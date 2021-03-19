@@ -57,13 +57,13 @@ This is the absolute minimum our operators and their managers need, in order to 
 
 _frontend version two_
 
--   [ ] make the UI/UX better
+-   [X] make the UI/UX better
     -   [X] shadows,
     -   [X] click, hover animations (e.g. changing to a darker shade of said color)
     -   [X] notifications
     -   [X] mobile layout
     -   [ ] ...
--   [ ] make the undo functionality better
+-   [X] make the undo functionality better
     -   [X] the user should be able to undo _all_ of his actions
     -   [X] when a user clicks undo, the item that switches lists should be in the same position as before (e.g., if the user resolved an error that was in the middle of the list at position 4, it should also re-appear at position 4 if he undoes this action)
 
