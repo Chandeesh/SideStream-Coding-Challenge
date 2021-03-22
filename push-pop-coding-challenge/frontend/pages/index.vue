@@ -97,7 +97,9 @@
 </template>
 
 <script>
-export default {
+import cloneDeep from 'lodash';
+
+export default {  
   async asyncData({ $axios }) {
     try {
       const { resolved, unresolved, backlog } = await $axios.$get(
@@ -125,11 +127,14 @@ export default {
       undo: [],
       undoAll: [],
       resolvedcount: [],
-      operator: "Chandeesh"
+      operator: "Chandeesh",
+      undoResolved: [],
+      undoUnresolved: [],
+      undoBacklog: []
     };
   },
 
-  mounted() {
+  created() {
     //intialize resolved count list which stores the count of the error code that is resolved
     for (let i in this.resolved) {
       this.resolvedcount[i] = {
@@ -138,6 +143,9 @@ export default {
         count : 0,
       }
     }
+    this.undoResolved =  JSON.parse(JSON.stringify(this.resolved));
+    this.undoUnresolved = JSON.parse(JSON.stringify(this.unresolved));
+    this.undoBacklog = JSON.parse(JSON.stringify(this.backlog));
   },
 
   methods: {
@@ -163,8 +171,10 @@ export default {
             code: list[i].code,
             text: list[i].text,
           }
-          if (!this.undoAll.some(e => e.index === inde)) {
+          if (list[i].index == inde && !this.undoAll.some(e => e.index === inde)) {
+            console.log(i)
             this.undoAll.push({
+            ori: i,
             index: list[i].index,
             code: list[i].code,
             text: list[i].text,
@@ -178,6 +188,7 @@ export default {
             this.$toasted.global.my_success(str2);
           } else if (str2 == "`unresolved`") {
             this.unresolved.push(list[i]);
+            console.log(this.undoResolved)
             list.splice(i, 1);
             this.$toasted.global.my_success(str2);
           } else {
@@ -193,6 +204,7 @@ export default {
 
     undoaction: function () {
       if(this.undo.length!=0) {
+        console.log(this.undo)
       if (this.undo[0].text.includes("`unresolved`")) {
         for (let i in this.resolved) {
           if (this.undo[0].index == this.resolved[i].index) {
@@ -206,7 +218,6 @@ export default {
               this.resolved[i]
             );
             this.resolved.splice(i, 1);
-            popundoall(this.undo[i].index)
             this.undo = [];
           }
         }
@@ -223,7 +234,6 @@ export default {
               this.unresolved[i]
             );
             this.unresolved.splice(i, 1);
-            popundoall(this.undo[i].index)
             this.undo = [];
           }
         }
@@ -240,7 +250,6 @@ export default {
               this.unresolved[i]
             );
             this.unresolved.splice(i, 1);
-            popundoall(this.undo[i].index)
             this.undo = [];
           }
         }
@@ -249,17 +258,7 @@ export default {
         this.$toasted.global.my_success("Failed")
       }
     },
-
-  // removing item from undo all list as undo is performed
-
-    popundoall: function (index) {
-      for (let i in this.undoAll) {
-        if(this.undoAll[i].index==index) {
-          this.undoAll.splice(i,1)
-        }
-      }
-    },
-
+    
   //function which counts the error code that is resolved and is stored in a list
 
     updatecount: function(ind,cod) {
@@ -271,65 +270,14 @@ export default {
       if(!this.resolvedcount.some(e=>e.index===ind)) {
           this.resolvedcount.push({index:ind,code:cod,count:1})
       }
-      console.log("Resolved Count",this.resolvedcount.count)
     },
 
   // function which undoes all the user actions
 
     undoactionall: function () {
-      if (this.undoAll.length!=0) {
-      for (let j in this.undoAll) {
-        if (this.undoAll[j].text.includes("`unresolved`")) {
-          for (let i in this.resolved) {
-            if (this.undoAll[j].index == this.resolved[i].index) {
-              this.resolved[i].text = this.resolved[i].text.replace(
-                "`resolved`",
-                "`unresolved`"
-              );
-              this.unresolved.push(this.resolved[i]);
-              this.resolved.splice(i, 1);
-            }
-          }
-        } else if (this.undoAll[j].text.includes("`resolved`")) {
-          for (let i in this.unresolved) {
-            if (this.undoAll[j].index == this.unresolved[i].index) {
-              this.unresolved[i].text = this.unresolved[i].text.replace(
-                "`unresolved`",
-                "`resolved`"
-              );
-              this.resolved.push(this.unresolved[i]);
-              this.unresolved.splice(i, 1);
-            }
-          }
-        } else {
-          console.log("Inside Backlog");
-          for (let i in this.unresolved) {
-            if (this.undoAll[j].index == this.unresolved[i].index) {
-              this.unresolved[i].text = this.unresolved[i].text.replace(
-                "`unresolved`",
-                "`backlog`"
-              );
-              this.backlog.push(this.unresolved[i]);
-              this.unresolved.splice(i, 1);
-            }
-          }
-          for (let i in this.resolved) {
-            if (this.undoAll[j].index == this.resolved[i].index) {
-              this.resolved[i].text = this.resolved[i].text.replace(
-                "`resolved`",
-                "`backlog`"
-              );
-              this.backlog.push(this.resolved[i]);
-              this.resolved.splice(i, 1);
-            }
-          }
-        }
-      } 
-      this.undo = [];
-      this.undoAll = [];
-      } else {
-         this.$toasted.global.my_success("Already done");
-      }
+      this.resolved =JSON.parse(JSON.stringify(this.undoResolved));
+      this.unresolved = JSON.parse(JSON.stringify(this.undoUnresolved));
+      this.backlog = JSON.parse(JSON.stringify(this.undoBacklog));
     },
   },
 };
