@@ -9,6 +9,7 @@
         <div class="navbar-nav ml-auto">
                 <a class="nav-item nav-link">Operator Name: {{operator}}</a>
         </div>
+    </nav>
     </div>
    </div>
    <div>
@@ -18,14 +19,14 @@
       <button class="btn btn-outline-primary float-right" style="width:150px;margin-top:20px;margin-right:10px" v-on:click="fetchSomething">Send Resolved</button>
      </div>
    </div>
-    <div class="container-fluid pt-3">    
+    <div class="container-fluid pt-3">
     <div class="row flex-row flex-sm-nowrap py-3">
         <div class="col-md-6 col-lg-4 col-xl-3" style="max-width: 60rem;margin-left:30px;margin-top:43px">
             <div class="card bg-light" style="width: 27rem">
                 <div class="card-body">
                     <h6 class="card-title">
                          <p class = "font-weight-bold">RESOLVED: {{resolved.length}}</p>
-                    </h6> 
+                    </h6>
                     <div v-for="error in resolved" :key="error.index">
                         <div class="items border border-light">
                         <div class="card draggable shadow-sm" style="margin-top:10px">
@@ -94,12 +95,13 @@
         </div>
   </div>
   </div>
+  </div>
 </template>
 
 <script>
 import cloneDeep from 'lodash';
 
-export default {  
+export default {
   async asyncData({ $axios }) {
     try {
       const { resolved, unresolved, backlog } = await $axios.$get(
@@ -162,7 +164,7 @@ export default {
 
  // function to push and pop the list according to the user action
 
-    pushpop: function (inde, list, str1, str2) {      
+    pushpop: function (inde, list, str1, str2) {
       for (let i in list) {
         if (list[i].index == inde) {
           this.undo[0] = {
@@ -258,14 +260,14 @@ export default {
         this.$toasted.global.my_success("Failed")
       }
     },
-    
+
   //function which counts the error code that is resolved and is stored in a list
 
     updatecount: function(ind,cod) {
       for (let i in this.resolvedcount) {
         if(this.resolvedcount[i].index==ind) {
           this.resolvedcount[i].count =  this.resolvedcount[i].count+1;
-        } 
+        }
       }
       if(!this.resolvedcount.some(e=>e.index===ind)) {
           this.resolvedcount.push({index:ind,code:cod,count:1})
